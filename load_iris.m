@@ -9,9 +9,9 @@ end
    %3. petal length in cm
    %4. petal width in cm
 
-class1 = load([class_path 'class_1'],'-ascii');
-class2 = load([class_path 'class_2'],'-ascii');
-class3 = load([class_path 'class_3'],'-ascii');
+class1 = load([class_path 'class_1.dat'],'-ascii');
+class2 = load([class_path 'class_2.dat'],'-ascii');
+class3 = load([class_path 'class_3.dat'],'-ascii');
 
 %****Task 1****
 %****a)****
@@ -23,7 +23,7 @@ Ntest=20;
 %0-30:setosa 31-60:versicolour 61-90:virginica
 classesTrain = [class1(1:Ntrain,:);class2(1:Ntrain,:);class3(1:Ntrain,:)];
 %0-20:setosa 21-40:versicolour 41-60:virginica
-classesTest = [class1(1:Ntest,:);class2(1:Ntest,:);class3(1:Ntest,:)];
+classesTest = [class1(end-Ntest+1:end,:);class2(end-Ntest+1:end,:);class3(end-Ntest+1:end,:)];
 
 %Keeps track of flowers and orders by zeros and ones matrix
 namesToClassesTrain = zeros(Ntrain*3,3);
