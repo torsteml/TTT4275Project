@@ -1,4 +1,21 @@
 %% Load dataset
+clear all;
+alpha = 0.0009;
+train_iterations = 1000;
+plots = true;
+iterateParams = true;
+if(iterateParams)
+    alpha = [0.00001:1/10000:0.01];
+    train_iterations = [10, 100, 1000];
+    plots = false;
+    ACCs = [];
+end
+for a=1:length(alpha)
+for i=1:length(train_iterations)
+if(iterateParams)
+    disp("Alpha: " + alpha(a));
+    disp("-Iterations: " + train_iterations(i));
+end
 [training_set, testing_set, training_idx, testing_idx]  = load_iris();
 N_train = size(training_set,1);
 N_test = size(testing_set,1);
@@ -7,19 +24,17 @@ t=training_idx;
 C=3; % Number of classes
 D=4; % Feature size
 Ds = ["Sepal Length","Sepal Width","Petal Length","Petal Width"];
-alpha = 0.0009;
-train_iterations = 1000;
 %% Train
 close all
 % Preallocate
 W = zeros(C,D+1); % W+wo
-W_all = zeros(C,D+1, train_iterations); % 
-grad_MSE_all = zeros(C,D+1, train_iterations);
+W_all = zeros(C,D+1, train_iterations(i)); % 
+grad_MSE_all = zeros(C,D+1, train_iterations(i));
 %wo = zeros(C,1); % Class offset
 g = zeros(N_train, C);
 
 % Calculate discriminant vector g
-for train_iteration = 1:train_iterations
+for train_iteration = 1:train_iterations(i)
     for i = 1:C
         for j = 1:N_train
            g(j,i)= W(i,:)*x(j,:)';
@@ -41,14 +56,61 @@ for train_iteration = 1:train_iterations
     % Update W
     %W = circshift(W,1) - alpfa.*grad_MSE;
     W_all(:,:,train_iteration) = W;
-    W = W - alpha.*grad_MSE;
+    W = W - alpha(a).*grad_MSE;
 end
 W_all(:,:,train_iteration) = W;
 %% Test
+x=[testing_set, ones(N_test,1)];
+t=testing_idx;
+g = zeros(N_test, C);
+% Predict test set
+for i = 1:C
+    for j = 1:N_test
+       g(j,i)= W(i,:)*x(j,:)';
+    end
+end
+g = sigmoid(g);
+% Convert fraction into 1 or 0 for each class
+[~,classified_classes] = max(g,[],2);
+% Create a ground truth vector of correct class labels
+ground_truth = testing_idx(:,1)+testing_idx(:,2)*2+testing_idx(:,3)*3;
+% Compare predicted labels with correct labels
+correct = classified_classes == ground_truth; % 1=correct prediction, 0=wrong prediction
+confusion_matrix = confusionmat(ground_truth, classified_classes);
+%% Calculate different measures
+% True positives
+TP = zeros(C,1);
+for c = 1:C
+   TP(c) = nnz(correct(ground_truth==c));
+end
+% True negatives
+TN = zeros(C,1);
+for c = 1:C
+   TN(c) = nnz(classified_classes(ground_truth~=c)~=c);
+end
+% False positives
+FP = zeros(C,1);
+for c = 1:C
+   FP(c) = nnz(classified_classes(ground_truth~=c)==c);
+end
+% False negatives
+FN = zeros(C,1);
+for c = 1:C
+   FN(c) = nnz(classified_classes(ground_truth==c)~=c);
+end
+[TPR, TNR, PPV, NPV, FNR, FPR, FDR, FOR, ACC, F1] =...
+    calculate_testingMeasures(TP, TN, FP, FN);
+[TPR_tot, TNR_tot, PPV_tot, NPV_tot, FNR_tot, FPR_tot, FDR_tot, FOR_tot, ACC_tot, F1_tot] =...
+    calculate_testingMeasures(sum(TP), sum(TN), sum(FP), sum(FN));
+
+if(iterateParams)
+    ACCs = [ACCs ACC_tot];
+end
 
 
 %% Show results W_all(2,1,:)
 x1 = [1:train_iterations];
+if(plots)
 for d = 1:D
     subplot(2,2,d)
     y1 = reshape(W_all(1,d,:),train_iterations,1);
@@ -70,6 +132,12 @@ for d = 1:D
     xlabel("Iterations");
     ylabel("Error");
 end
+%% Plot confusion matrix
+figure;
+cm=confusionchart(confusion_matrix);
+cm.Title = 'Confusion Matrix using Linear Classifier';
+cm.RowSummary = 'row-normalized';
+cm.ColumnSummary = 'column-normalized';
 
 %% Visualize model
 fwidth = 0.5;
@@ -126,6 +194,16 @@ for row = 1:D
         title(['Row: ' num2str(row) ', Col: ' num2str(col)]);
         hold off
     end
+end
+end
+end
+end
+
+if(iterateParams)
+    plot(alpha,ACCs)
+    title("Plot of accuracy versus alpha");
+    xlabel("Alpha");
+    ylabel("Accuracy");
 end
 
 
