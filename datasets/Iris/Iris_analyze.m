@@ -61,7 +61,48 @@ ground_truth = testing_idx(:,1)+testing_idx(:,2)*2+testing_idx(:,3)*3;
 % Compare predicted labels with correct labels
 correct = classified_classes == ground_truth; % 1=correct prediction, 0=wrong prediction
 confusion_matrix = confusionmat(ground_truth, classified_classes);
-
+%% Calculate different measures
+% True positives
+TP = zeros(C,1);
+for c = 1:C
+   TP(c) = nnz(correct(ground_truth==c));
+end
+% True negatives
+TN = zeros(C,1);
+for c = 1:C
+   TN(c) = nnz(classified_classes(ground_truth~=c)~=c);
+end
+% False positives
+FP = zeros(C,1);
+for c = 1:C
+   FP(c) = nnz(classified_classes(ground_truth~=c)==c);
+end
+% False negatives
+FN = zeros(C,1);
+for c = 1:C
+   FN(c) = nnz(classified_classes(ground_truth==c)~=c);
+end
+% True positive rate, sensitivity
+TPR = TP./(TP+FN);
+% True negative rate, specificity
+TNR = TN./(TN+FP);
+% Positive preditictive rate, precision
+PPV = TP./(TP+FP);
+% Negative preditictive rate
+NPV = TN./(TN+FN);
+% False negative rate, miss rate
+FNR = 1-TPR;
+% False positive rate, fall-out
+FPR = 1-TNR;
+% False discovery rate
+FDR = 1-PPV;
+% False ommission rate
+FOR = 1-NPV;
+% Accuracy
+ACC = (TP+TN)./(TP+TN+FP+FN);
+% F1 score
+%  - The harmonic mean of precision and sensitivity
+F1 = 2.*(PPV.*TPR)./(PPV+TPR);
 
 
 %% Show results W_all(2,1,:)
