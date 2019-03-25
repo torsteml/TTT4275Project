@@ -5,8 +5,8 @@ train_iterations = 1000;
 plots = true;
 iterateParams = true;
 if(iterateParams)
-    alpha = [0.00001:1/10000:0.01];
-    train_iterations = [10, 100, 1000, 10000];
+    alpha = [0.00001:1/10000:0.1];
+    train_iterations = [10, 100, 1000, 10000, 100000];
     plots = false;
 end
 for alp=1:length(alpha)
@@ -104,7 +104,8 @@ end
 
 if(iterateParams)
     ACCs(iter,alp)=ACC_tot;
-    disp(ACC_tot);
+    disp("Accuracy: " + ACC_tot);
+    fprintf("\n");
 end
 
 

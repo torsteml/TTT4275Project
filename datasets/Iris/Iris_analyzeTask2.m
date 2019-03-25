@@ -14,21 +14,19 @@ complete_set = [training_set; testing_set];
 complete_idx = [training_idx; testing_idx];
 
 nBins = 40;
-hold on;
-%sepal length
-    %Setosa
-    histPlot = complete_set(:,1).*complete_idx(:,1);
-    histPlotReal = histPlot(histPlot~=0);
-    histogram(histPlotReal,nBins);
-    %versicolour
-    histPlot = complete_set(:,1).*complete_idx(:,2);
-    histPlotReal = histPlot(histPlot~=0);
-    histogram(histPlotReal,30);
-    %virginica
-    histPlot = complete_set(:,1).*complete_idx(:,3);
-    histPlotReal = histPlot(histPlot~=0);
-    histogram(histPlotReal,30);
-%sepal width
-%petal length
-%petal width
+
+features = ["Sepal Length", "Sepal Width", "Petal length", "Petal Width"];
+classes = ["Setosa", "Versicolour", "Virginica"];
+for feature=1:length(complete_set(1,:))
+    subplot(2,2,feature);
+    hold on;
+    for class=1:length(complete_idx(1,:))
+        histPlot = complete_set(:,feature).*complete_idx(:,class);
+        histPlotReal = histPlot(histPlot~=0);
+        histogram(histPlotReal,nBins);
+    end
+    legend(classes);
+    hold off;
+    title(features(feature));
+end
 
