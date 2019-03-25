@@ -44,6 +44,24 @@ for train_iteration = 1:train_iterations
 end
 W_all(:,:,train_iteration) = W;
 %% Test
+x=[testing_set, ones(N_test,1)];
+t=testing_idx;
+g = zeros(N_test, C);
+% Predict test set
+for i = 1:C
+    for j = 1:N_test
+       g(j,i)= W(i,:)*x(j,:)';
+    end
+end
+g = sigmoid(g);
+% Convert fraction into 1 or 0 for each class
+[~,classified_classes] = max(g,[],2);
+% Create a ground truth vector of correct class labels
+ground_truth = testing_idx(:,1)+testing_idx(:,2)*2+testing_idx(:,3)*3;
+% Compare predicted labels with correct labels
+correct = classified_classes == ground_truth; % 1=correct prediction, 0=wrong prediction
+confusion_matrix = confusionmat(ground_truth, classified_classes);
+
 
 
 %% Show results W_all(2,1,:)
@@ -63,6 +81,12 @@ for d = 1:D
     y3 = reshape(grad_MSE_all(3,d,:),train_iterations,1);
     plot(x1,y1,x1,y2,x1,y3);
 end
+%% Plot confusion matrix
+figure;
+cm=confusionchart(confusion_matrix);
+cm.Title = 'Confusion Matrix using Linear Classifier';
+cm.RowSummary = 'row-normalized';
+cm.ColumnSummary = 'column-normalized';
 
 %% Visualize model
 fwidth = 0.5;
