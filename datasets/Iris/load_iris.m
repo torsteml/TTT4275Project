@@ -1,8 +1,15 @@
-function [training_set, testing_set, training_idx, testing_idx] = load_iris(class_path)
+function [training_set, testing_set, training_idx, testing_idx] = load_iris(class_path, Ntrain, Ntest)
 
 if nargin < 1
    class_path = 'datasets/Iris/'; 
 end
+if nargin < 2
+    Ntrain = 30;
+end
+if nargin < 3
+    Ntest = 20;
+end
+
 %7. Attribute Information:
    %1. sepal length in cm
    %2. sepal width in cm
@@ -12,12 +19,6 @@ end
 class1 = load([class_path 'class_1.dat'],'-ascii');
 class2 = load([class_path 'class_2.dat'],'-ascii');
 class3 = load([class_path 'class_3.dat'],'-ascii');
-
-%****Task 1****
-%****a)****
-
-Ntrain=30;
-Ntest=20;
 
 %Splits into training and testing
 %0-30:setosa 31-60:versicolour 61-90:virginica
