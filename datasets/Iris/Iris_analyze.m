@@ -53,54 +53,38 @@ for train_iteration = 1:train_iterations(iter)
     % end
     %%
     % Update W
-    %W = circshift(W,1) - alpfa.*grad_MSE;
     W_all(:,:,train_iteration) = W;
     W = W - alpha(alp).*grad_MSE;
 end
 W_all(:,:,train_iteration) = W;
 %% Test
-x=[testing_set, ones(N_test,1)];
-t=testing_idx;
-g = zeros(N_test, C);
-% Predict test set
-for i = 1:C
-    for j = 1:N_test
-       g(j,i)= W(i,:)*x(j,:)';
-    end
-end
-g = sigmoid(g);
-% Convert fraction into 1 or 0 for each class
-[~,classified_classes] = max(g,[],2);
+x_test=[testing_set, ones(N_test,1)];
+predicted = iris_predict(x_test,W);
 % Create a ground truth vector of correct class labels
 ground_truth = testing_idx(:,1)+testing_idx(:,2)*2+testing_idx(:,3)*3;
 % Compare predicted labels with correct labels
-correct = classified_classes == ground_truth; % 1=correct prediction, 0=wrong prediction
-confusion_matrix = confusionmat(ground_truth, classified_classes);
+correct = predicted == ground_truth; % 1=correct prediction, 0=wrong prediction
+
 %% Calculate different measures
-% True positives
-TP = zeros(C,1);
-for c = 1:C
-   TP(c) = nnz(correct(ground_truth==c));
-end
-% True negatives
-TN = zeros(C,1);
-for c = 1:C
-   TN(c) = nnz(classified_classes(ground_truth~=c)~=c);
-end
-% False positives
-FP = zeros(C,1);
-for c = 1:C
-   FP(c) = nnz(classified_classes(ground_truth~=c)==c);
-end
-% False negatives
-FN = zeros(C,1);
-for c = 1:C
-   FN(c) = nnz(classified_classes(ground_truth==c)~=c);
-end
+% Test set
+[TP,TN,FP,FN]=calculate_testingNumbers(predicted, ground_truth);
+
 [TPR, TNR, PPV, NPV, FNR, FPR, FDR, FOR, ACC, F1] =...
     calculate_testingMeasures(TP, TN, FP, FN);
+
 [TPR_tot, TNR_tot, PPV_tot, NPV_tot, FNR_tot, FPR_tot, FDR_tot, FOR_tot, ACC_tot, F1_tot] =...
     calculate_testingMeasures(sum(TP), sum(TN), sum(FP), sum(FN));
+confusion_matrix = confusionmat(ground_truth, predicted)
+% Training set
+predicted_training = iris_predict(x,W);
+ground_truth_training = training_idx(:,1)+training_idx(:,2)*2+training_idx(:,3)*3;
+[TP_train,TN_train,FP_train,FN_train]=...
+    calculate_testingNumbers(predicted_training, ground_truth_training);
+
+[TPR_train, TNR_train, PPV_train, NPV_train, FNR_train, FPR_train, FDR_train, FOR_train, ACC_train, F1_train] =...
+    calculate_testingMeasures(sum(TP_train), sum(TN_train), sum(FP_train), sum(FN_train));
+
+confusion_matrix_train = confusionmat(ground_truth_training, predicted_training)
 
 if(iterateParams)
     ACCs(iter,alp)=ACC_tot;
@@ -110,36 +94,32 @@ end
 
 
 %% Show results W_all(2,1,:)
-x1 = [1:train_iterations];
+% x1 = [1:train_iterations];
 if(plots)
-for d = 1:D
-    subplot(2,2,d)
-    y1 = reshape(W_all(1,d,:),train_iterations,1);
-    y2 = reshape(W_all(2,d,:),train_iterations,1);
-    y3 = reshape(W_all(3,d,:),train_iterations,1);
-    plot(x1,y1,x1,y2,x1,y3);
+%     subplot(2,2,d)
+%     y1 = reshape(W_all(1,d,:),train_iterations,1);
+%     y2 = reshape(W_all(2,d,:),train_iterations,1);
+%     y3 = reshape(W_all(3,d,:),train_iterations,1);
+%     plot(x1,y1,x1,y2,x1,y3);
+% end
     title("Weights for " + Ds(d));
     xlabel("Iterations");
     ylabel("Weight");
-end
-figure;
-for d = 1:D
-    subplot(2,2,d)
-    y1 = reshape(grad_MSE_all(1,d,:),train_iterations,1);
-    y2 = reshape(grad_MSE_all(2,d,:),train_iterations,1);
-    y3 = reshape(grad_MSE_all(3,d,:),train_iterations,1);
-    plot(x1,y1,x1,y2,x1,y3);
+%     y1 = reshape(grad_MSE_all(1,d,:),train_iterations,1);
+%     y2 = reshape(grad_MSE_all(2,d,:),train_iterations,1);
+%     y3 = reshape(grad_MSE_all(3,d,:),train_iterations,1);
+%     plot(x1,y1,x1,y2,x1,y3);
+% end
     title("Errors");
     xlabel("Iterations");
     ylabel("Error");
-end
 %% Plot confusion matrix
 figure;
 cm=confusionchart(confusion_matrix);
-cm.Title = 'Confusion Matrix using Linear Classifier';
+cm.Title = 'Confusion Matrix using Linear Classifier for Test Set';
 cm.RowSummary = 'row-normalized';
 cm.ColumnSummary = 'column-normalized';
-
+return
 %% Visualize model
 fwidth = 0.5;
 fheight = 0.5;
@@ -176,23 +156,25 @@ for row = 1:D
         xs = linspace(xLim(1),xLim(2),decisionLine_points);
         ys = zeros(C,decisionLine_points);
         for c = 1:C
-            x_dim = col;
             y_dim = row;
-            % w1*x+w2*y+w0=0
-            w1 = W(c,x_dim);
-            w2 = W(c,y_dim);
+            x_dim = col;
+            % w1*x1+w2*x2+w0=0
+            % x1 =- w2/w1*x2-w0/w1
+            w1 = W(c,y_dim);
+            w2 = W(c,x_dim);
             w0 = W(c,end);
             % y = a*x+b
-            b = -w0/w2;
+            b = -w0/w1;
             alp = -(w1/w2);
             y = @(x) alp.*x+b;
             ys(c,:) = y(xs);
         end
         % Plot decision boundary lines
+%         for c = 1:1
 %         for c = 1:C
 %             plot(xs,ys(c,:),'Color',color_map(c,:));
 %         end
-        title(['Row: ' num2str(row) ', Col: ' num2str(col)]);
+       % title(['Row: ' num2str(row) ', Col: ' num2str(col)]);
         hold off
     end
 end
