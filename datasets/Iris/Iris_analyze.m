@@ -3,7 +3,7 @@ clear all;
 alpha = 0.0009;
 train_iterations = 1000;
 plots = true;
-iterateParams = true;
+iterateParams = false;
 if(iterateParams)
     alpha = [0.00001:1/10000:0.01];
     train_iterations = [10, 100, 1000, 10000];
