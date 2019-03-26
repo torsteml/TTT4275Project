@@ -74,7 +74,7 @@ correct = predicted == ground_truth; % 1=correct prediction, 0=wrong prediction
 
 [TPR_tot, TNR_tot, PPV_tot, NPV_tot, FNR_tot, FPR_tot, FDR_tot, FOR_tot, ACC_tot, F1_tot] =...
     calculate_testingMeasures(sum(TP), sum(TN), sum(FP), sum(FN));
-confusion_matrix = confusionmat(ground_truth, predicted)
+confusion_matrix = confusionmat(ground_truth, predicted);
 % Training set
 predicted_training = iris_predict(x,W);
 ground_truth_training = training_idx(:,1)+training_idx(:,2)*2+training_idx(:,3)*3;
@@ -84,7 +84,7 @@ ground_truth_training = training_idx(:,1)+training_idx(:,2)*2+training_idx(:,3)*
 [TPR_train, TNR_train, PPV_train, NPV_train, FNR_train, FPR_train, FDR_train, FOR_train, ACC_train, F1_train] =...
     calculate_testingMeasures(sum(TP_train), sum(TN_train), sum(FP_train), sum(FN_train));
 
-confusion_matrix_train = confusionmat(ground_truth_training, predicted_training)
+confusion_matrix_train = confusionmat(ground_truth_training, predicted_training);
 
 if(iterateParams)
     ACCs(iter,alp)=ACC_tot;
