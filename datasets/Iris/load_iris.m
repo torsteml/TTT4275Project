@@ -23,8 +23,10 @@ class3 = load([class_path 'class_3.dat'],'-ascii');
 %Splits into training and testing
 %0-30:setosa 31-60:versicolour 61-90:virginica
 classesTrain = [class1(1:Ntrain,:);class2(1:Ntrain,:);class3(1:Ntrain,:)];
+%%classesTrain = [class1(end-Ntrain+1:end,:);class2(end-Ntrain+1:end,:);class3(end-Ntrain+1:end,:)];
 %0-20:setosa 21-40:versicolour 41-60:virginica
 classesTest = [class1(end-Ntest+1:end,:);class2(end-Ntest+1:end,:);class3(end-Ntest+1:end,:)];
+%%classesTest = [class1(1:Ntest,:);class2(1:Ntest,:);class3(1:Ntest,:)];
 
 %Keeps track of flowers and orders by zeros and ones matrix
 namesToClassesTrain = zeros(Ntrain*3,3);
@@ -36,7 +38,11 @@ namesToClassesTest = zeros(Ntest*3,3);
     namesToClassesTest(Ntest+1:2*Ntest,2) = 1; %versicolour
     namesToClassesTest(2*Ntest+1:3*Ntest,3) = 1; %virginica
     
+classesTrain(:,2) = [];
+classesTrain(:,1) = [];
 training_set = classesTrain;
+classesTest(:,2) = [];
+classesTrain(:,1) = [];
 testing_set = classesTest;
 
 training_idx = namesToClassesTrain;

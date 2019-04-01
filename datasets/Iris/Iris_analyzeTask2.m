@@ -15,7 +15,7 @@ complete_idx = [training_idx; testing_idx];
 
 nBins = 40;
 
-features = ["Sepal Length", "Sepal Width", "Petal length", "Petal Width"];
+features = ["Sepal lengde", "Sepal bredde", "Petal lengde", "Petal bredde"];
 classes = ["Setosa", "Versicolour", "Virginica"];
 for feature=1:length(complete_set(1,:))
     subplot(2,2,feature);
@@ -25,8 +25,15 @@ for feature=1:length(complete_set(1,:))
         histPlotReal = histPlot(histPlot~=0);
         histogram(histPlotReal,nBins);
     end
+    ylabel("Antall");
+    
+    if(contains(features(feature),"lengde"))
+        xlabel("Lengde[cm]");
+    else
+        xlabel("Bredde[cm]");
+    end
     legend(classes);
     hold off;
-    title(features(feature));
+    %title(features(feature));
 end
 
