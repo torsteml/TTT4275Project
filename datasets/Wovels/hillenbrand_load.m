@@ -75,16 +75,43 @@ end
 [~, predicted_classes_diag] = max(class_probabilities_diag,[],2);
 % Compare predicted labels with correct labels
 correct_diag = predicted_classes_diag == ground_truth; % 1=correct prediction, 0=wrong prediction
-%% Make scatter plots
+
+
+
+%% Oppgave 2
+
+% Create gaussian mixture model for each class
+mixtures = [2,3]; % Do one run for 2 mixtures for each class, and one for 3.
+gaussian_mixture_models = cell(numel(vowels),numel(mixtures));
+for row = 1:numel(vowels)
+    tbl = vowel_classes_train{row,1};
+    data_matrix = [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s];
+    fprintf('Vowel %s: \n', char(vowels(row)));
+    for m_num = 1:numel(mixtures)
+        m=mixtures(m_num);
+        fprintf('-m=%d\n',m);
+        try
+        gaussian_mixture_models{row,m_num} = fitgmdist(data_matrix,m,...
+            'CovarianceType','diagonal','Options',statset('Display','final'));
+        catch exception
+            disp('There was an error fitting the Gaussian mixture model')
+            error = exception.message
+        end
+    end
+end
 
 
 
 
-%% Make histograms
-x = formant_table.F0s(formant_table.talker=='m');
-figure(1);
-subplot(221);
-hist(x,20);
-% use 20 �bins�
-set(gca,'XLim',[50 500]); % set x-axis limits between 50 & 500 Hz
-title('adult males');
+
+
+
+
+
+
+
+
+
+
+
+
