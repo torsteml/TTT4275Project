@@ -67,7 +67,24 @@ disp("Error rate: " + (1-ACC_tot));
 figure(2)
 cm = confusionchart(ground_truth,predicted_classes)
 
+%% 1c) Create single Gaussian class model for each class with only diagonal matrices 
+gaussian_models_diag = cell(numel(vowels),1);
+for row = 1:numel(vowels)
+    mu=vowel_classes_train{row,2}; 
+    sigma=diag(vowel_classes_train{row,3}).*eye(4);
+    gaussian_models_diag{row} = gmdistribution(mu,sigma);
+end
 
+% Classify
+class_probabilities_diag = zeros(size(testing_set,1),numel(vowels));
+
+for vowel_num = 1:numel(vowels)
+    class_probabilities_diag(:,vowel_num) = pdf(gaussian_models_diag{vowel_num,1},testing_set);
+end
+
+[~, predicted_classes_diag] = max(class_probabilities_diag,[],2);
+% Compare predicted labels with correct labels
+correct_diag = predicted_classes_diag == ground_truth; % 1=correct prediction, 0=wrong prediction
 %% Make scatter plots
 
 
