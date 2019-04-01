@@ -3,26 +3,67 @@
 formant_table = load_vowdata();
 
 %% 1a) Find the sample mean and the sample covariance matrix for each class set.
-
+train_len = 70;
+test_len = 69;
 % # Seperate into each vowel class
 vowels = unique(formant_table.vowel);
-vowel_classes = cell(numel(vowels),3); % data, mean, covariance
+vowel_classes = cell(numel(vowels),3);
+vowel_classes_train = cell(numel(vowels),3); % data, mean, covariance
+vowel_classes_test = cell(numel(vowels),3);
+
 for row = 1:numel(vowels)
-   vowel_classes{row,1} = formant_table(formant_table.vowel == vowels(row),:)
-   vowel_classes{row,1} = vowel_classes{row,1}(1:70,:);
-   
+   vowel_classes{row,1} = formant_table(formant_table.vowel == vowels(row),:);
+   vowel_classes_train{row,1} = vowel_classes{row,1}(1:70,:);
+   vowel_classes_test{row,1} = vowel_classes{row,1}(71:139,:);
 end
 
-% ## Find mean for each vowel
+% ## Find mean and covariance for each vowel
 for row = 1:numel(vowels)
-    tbl = vowel_classes{row,1};
+    tbl = vowel_classes_train{row,1};
     formant_matrix = [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s];
-    vowel_classes{row,2} = mean(formant_matrix); 
-    vowel_classes{row,3} = cov(formant_matrix); 
+    vowel_classes_train{row,2} = mean(formant_matrix); 
+    vowel_classes_train{row,3} = cov(formant_matrix); 
 end
 
+%% 1b) Create single Gaussian class model for each class. 
+gaussian_models = cell(numel(vowels),1);
+for row = 1:numel(vowels)
+    mu=vowel_classes_train{row,2}; 
+    sigma=vowel_classes_train{row,3};
+    gaussian_models{row} = gmdistribution(mu,sigma);
+end
 
+%% Classify training set
+% Create test matrix where each column is F0-F4
+testing_set = zeros(test_len*numel(vowels),4);
+ground_truth = zeros(test_len*numel(vowels),1);
+for vowel_num = 1:numel(vowels)
+    tbl = vowel_classes_test{vowel_num,1};
+   testing_set(1+test_len*(vowel_num-1):(test_len*vowel_num),:) = ...
+       [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s]; 
+   ground_truth(1+test_len*(vowel_num-1):(test_len*vowel_num),:) = vowel_num;
+end
+% Classify
+class_probabilities = zeros(size(testing_set,1),numel(vowels));
 
+for vowel_num = 1:numel(vowels)
+    class_probabilities(:,vowel_num) = pdf(gaussian_models{vowel_num,1},testing_set);
+end
+
+[~, predicted_classes] = max(class_probabilities,[],2);
+% Compare predicted labels with correct labels
+correct = predicted_classes == ground_truth; % 1=correct prediction, 0=wrong prediction
+%% Evaluate errors. 
+[TP,TN,FP,FN]=calculate_testingNumbers(predicted_classes, ground_truth);
+[TPR, TNR, PPV, NPV, FNR, FPR, FDR, FOR, ACC, F1] =...
+    calculate_testingMeasures(TP, TN, FP, FN);
+[TPR_tot, TNR_tot, PPV_tot, NPV_tot, FNR_tot, FPR_tot, FDR_tot, FOR_tot, ACC_tot, F1_tot] =...
+    calculate_testingMeasures(sum(TP), sum(TN), sum(FP), sum(FN));
+confusion_matrix = confusionmat(ground_truth, predicted_classes);
+disp("Accuracy: " + ACC_tot);
+disp("Error rate: " + (1-ACC_tot));
+
+% #Confusion 
 
 
 %% Make scatter plots

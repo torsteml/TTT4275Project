@@ -1,5 +1,5 @@
 function [TP,TN,FP,FN]=calculate_testingNumbers(predicted, ground_truth)
-C = 3;
+C = 12;
 % True positives
 TP = zeros(C,1);
 for c = 1:C
