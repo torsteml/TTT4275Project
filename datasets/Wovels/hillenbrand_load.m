@@ -36,10 +36,12 @@ end
 %% Classify training set
 % Create test matrix where each column is F0-F4
 testing_set = zeros(test_len*numel(vowels),4);
+ground_truth = zeros(test_len*numel(vowels),1);
 for vowel_num = 1:numel(vowels)
     tbl = vowel_classes_test{vowel_num,1};
    testing_set(1+test_len*(vowel_num-1):(test_len*vowel_num),:) = ...
        [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s]; 
+   ground_truth(1+test_len*(vowel_num-1):(test_len*vowel_num),:) = vowel_num;
 end
 % Classify
 class_probabilities = zeros(size(testing_set,1),numel(vowels));
@@ -49,7 +51,8 @@ for vowel_num = 1:numel(vowels)
 end
 
 [~, predicted_classes] = max(class_probabilities,[],2);
-
+% Compare predicted labels with correct labels
+correct = predicted_classes == ground_truth; % 1=correct prediction, 0=wrong prediction
 %% Evaluate errors. 
 
 
