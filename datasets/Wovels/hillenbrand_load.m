@@ -11,7 +11,7 @@ for row = 1:numel(vowels)
    vowel_classes{row,1} = formant_table(formant_table.vowel == vowels(row),:); 
 end
 
-% ## Find mean for each vowel
+% ## Find mean and covariance for each vowel
 for row = 1:numel(vowels)
     tbl = vowel_classes{row,1};
     formant_matrix = [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s];
@@ -19,6 +19,22 @@ for row = 1:numel(vowels)
     vowel_classes{row,3} = cov(formant_matrix); 
 end
 
+%% 1b) Create single Gaussian class model for each class. 
+gaussian_models = cell(numel(vowels),1);
+for row = 1:numel(vowels)
+    mu=vowel_classes{row,2}; 
+    sigma=vowel_classes{row,3};
+    gaussian_models{row} = gmdistribution(mu,sigma);
+end
+
+%% Classify training set
+training_set = vec;
+class_probabilities = zeros(size(training_set,1),numel(vowels));
+
+for vowelNum = 1:numel(vowels)
+    class_probabilities(:,vowelNum) = pdf(gaussian_models(vowel_num,1));
+    
+end
 
 
 
