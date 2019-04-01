@@ -54,8 +54,18 @@ end
 % Compare predicted labels with correct labels
 correct = predicted_classes == ground_truth; % 1=correct prediction, 0=wrong prediction
 %% Evaluate errors. 
+[TP,TN,FP,FN]=calculate_testingNumbers(predicted_classes, ground_truth);
+[TPR, TNR, PPV, NPV, FNR, FPR, FDR, FOR, ACC, F1] =...
+    calculate_testingMeasures(TP, TN, FP, FN);
+[TPR_tot, TNR_tot, PPV_tot, NPV_tot, FNR_tot, FPR_tot, FDR_tot, FOR_tot, ACC_tot, F1_tot] =...
+    calculate_testingMeasures(sum(TP), sum(TN), sum(FP), sum(FN));
+confusion_matrix = confusionmat(ground_truth, predicted_classes);
+disp("Accuracy: " + ACC_tot);
+disp("Error rate: " + (1-ACC_tot));
 
-
+% #Confusion matrix
+figure(2)
+cm = confusionchart(ground_truth,predicted_classes)
 
 
 %% Make scatter plots
