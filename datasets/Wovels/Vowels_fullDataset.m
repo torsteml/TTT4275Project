@@ -20,7 +20,7 @@ end
 % ## Find mean and covariance for each vowel
 for row = 1:numel(vowels)
     tbl = vowel_classes_train{row,1};
-    formant_matrix = [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s];
+    formant_matrix = table2array(tbl(:,6:end));
     vowel_classes_train{row,2} = mean(formant_matrix); 
     vowel_classes_train{row,3} = cov(formant_matrix); 
 end
@@ -34,13 +34,13 @@ for row = 1:numel(vowels)
 end
 
 %% Classify training set
-% Create test matrix where each column is F0-F4
-testing_set = zeros(test_len*numel(vowels),4);
+% Create test matrix where each column is F0-end
+testing_set = zeros(test_len*numel(vowels),14);
 ground_truth = zeros(test_len*numel(vowels),1);
 for vowel_num = 1:numel(vowels)
     tbl = vowel_classes_test{vowel_num,1};
    testing_set(1+test_len*(vowel_num-1):(test_len*vowel_num),:) = ...
-       [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s]; 
+       table2array(tbl(:,6:end)); 
    ground_truth(1+test_len*(vowel_num-1):(test_len*vowel_num),:) = vowel_num;
 end
 % Classify
@@ -73,7 +73,7 @@ cm.ColumnSummary = 'column-normalized';
 gaussian_models_diag = cell(numel(vowels),1);
 for row = 1:numel(vowels)
     mu=vowel_classes_train{row,2}; 
-    sigma=diag(vowel_classes_train{row,3}).*eye(4);
+    sigma=diag(vowel_classes_train{row,3}).*eye(14);
     gaussian_models_diag{row} = gmdistribution(mu,sigma);
 end
 
@@ -111,7 +111,7 @@ mixtures = [2,3]; % Do one run for 2 mixtures for each class, and one for 3.
 gaussian_mixture_models = cell(numel(vowels),numel(mixtures));
 for row = 1:numel(vowels)
     tbl = vowel_classes_train{row,1};
-    data_matrix = [tbl.F0s, tbl.F1s, tbl.F2s, tbl.F3s];
+    data_matrix = table2array(tbl(:,6:end));
     fprintf('Vowel %s: \n', char(vowels(row)));
     for m_num = 1:numel(mixtures)
         m=mixtures(m_num);
