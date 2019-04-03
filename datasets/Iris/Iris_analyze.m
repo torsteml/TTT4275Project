@@ -21,7 +21,7 @@ N_test = size(testing_set,1);
 x=[training_set, ones(N_train,1)];
 t=training_idx;
 C=3; % Number of classes
-D=2; % Feature size
+D=3; % Feature size
 Ds = ["Sepal Length","Sepal Width","Petal Length","Petal Width"];
 %% Train
 close all
@@ -58,10 +58,10 @@ for train_iteration = 1:train_iterations(iter)
 end
 W_all(:,:,train_iteration) = W;
 %% Test
-x_test=[testing_set, ones(N_test,1)];
-predicted = iris_predict(x_test,W);
+x_train=[training_set, ones(N_train,1)];
+predicted = iris_predict(x_train,W);
 % Create a ground truth vector of correct class labels
-ground_truth = testing_idx(:,1)+testing_idx(:,2)*2+testing_idx(:,3)*3;
+ground_truth = training_idx(:,1)+training_idx(:,2)*2+training_idx(:,3)*3;
 % Compare predicted labels with correct labels
 correct = predicted == ground_truth; % 1=correct prediction, 0=wrong prediction
 
@@ -118,7 +118,7 @@ if(plots)
 %% Plot confusion matrix
 figure;
 cm=confusionchart(confusion_matrix);
-cm.Title = 'Confusion Matrix using Linear Classifier for Test Set';
+%cm.Title = 'Confusion Matrix using Linear Classifier for Test Set';
 cm.RowSummary = 'row-normalized';
 cm.ColumnSummary = 'column-normalized';
 return
