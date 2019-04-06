@@ -1,7 +1,7 @@
 %% Load dataset
-clear all;
-alpha = 0.0009;
-train_iterations = 1000;
+%clear all;
+alpha = 0.01421;%0.0009;
+train_iterations = 10;
 plots = true;
 iterateParams = false;
 if(iterateParams)
@@ -9,6 +9,7 @@ if(iterateParams)
     train_iterations = [10, 100, 1000, 10000, 100000];
     plots = false;
 end
+%%
 for alp=1:length(alpha)
 for iter=1:length(train_iterations)
 if(iterateParams)
@@ -94,32 +95,30 @@ end
 
 
 %% Show results W_all(2,1,:)
-% x1 = [1:train_iterations];
-if(plots)
-%     subplot(2,2,d)
-%     y1 = reshape(W_all(1,d,:),train_iterations,1);
-%     y2 = reshape(W_all(2,d,:),train_iterations,1);
-%     y3 = reshape(W_all(3,d,:),train_iterations,1);
-%     plot(x1,y1,x1,y2,x1,y3);
-% end
-    title("Weights for " + Ds(d));
-    xlabel("Iterations");
-    ylabel("Weight");
-%     y1 = reshape(grad_MSE_all(1,d,:),train_iterations,1);
-%     y2 = reshape(grad_MSE_all(2,d,:),train_iterations,1);
-%     y3 = reshape(grad_MSE_all(3,d,:),train_iterations,1);
-%     plot(x1,y1,x1,y2,x1,y3);
-% end
-    title("Errors");
-    xlabel("Iterations");
-    ylabel("Error");
+x1 = [1:train_iterations];
+for d = 1:D
+    subplot(2,2,d)
+    y1 = reshape(W_all(1,d,:),train_iterations,1);
+    y2 = reshape(W_all(2,d,:),train_iterations,1);
+    y3 = reshape(W_all(3,d,:),train_iterations,1);
+    plot(x1,y1,x1,y2,x1,y3);
+end
+figure;
+for d = 1:D
+    subplot(2,2,d)
+    y1 = reshape(grad_MSE_all(1,d,:),train_iterations,1);
+    y2 = reshape(grad_MSE_all(2,d,:),train_iterations,1);
+    y3 = reshape(grad_MSE_all(3,d,:),train_iterations,1);
+    plot(x1,y1,x1,y2,x1,y3);
+end
+
 %% Plot confusion matrix
 figure;
 cm=confusionchart(confusion_matrix);
 cm.Title = 'Confusion Matrix using Linear Classifier for Test Set';
 cm.RowSummary = 'row-normalized';
 cm.ColumnSummary = 'column-normalized';
-return
+
 %% Visualize model
 fwidth = 0.5;
 fheight = 0.5;
@@ -165,30 +164,33 @@ for row = 1:D
             w0 = W(c,end);
             % y = a*x+b
             b = -w0/w1;
-            alp = -(w1/w2);
-            y = @(x) alp.*x+b;
+            a_y = -(w1/w2);
+            y = @(x) a_y.*x+b;
             ys(c,:) = y(xs);
         end
         % Plot decision boundary lines
-%         for c = 1:1
-%         for c = 1:C
-%             plot(xs,ys(c,:),'Color',color_map(c,:));
-%         end
+        for c = 1:C
+            plot(xs,ys(c,:),'Color',color_map(c,:));
+        end
        % title(['Row: ' num2str(row) ', Col: ' num2str(col)]);
         hold off
     end
 end
 end
 end
-end
 
-if(iterateParams)
-    plot(alpha,ACCs)
+%%
+load('PlotOFAlphaSweep.mat')
+alpha_plt = [0.00001:1/10000:0.1];
+train_iterations_plt = [10, 100, 1000, 10000, 100000];
+    figure;
+    
+    plot(alpha_plt,ACCs)
     title("Plot of accuracy versus alpha");
     xlabel("Alpha");
     ylabel("Accuracy");
-    legend(strtrim(cellstr(num2str(train_iterations'))'))
-end
+    legend(strtrim(cellstr(num2str(train_iterations_plt'))'))
+
 
 
 
