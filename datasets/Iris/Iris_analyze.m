@@ -21,7 +21,7 @@ N_test = size(testing_set,1);
 x=[training_set, ones(N_train,1)];
 t=training_idx;
 C=3; % Number of classes
-D=3; % Feature size
+D=1; % Feature size
 Ds = ["Sepal Length","Sepal Width","Petal Length","Petal Width"];
 %% Train
 close all

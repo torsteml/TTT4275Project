@@ -39,13 +39,13 @@ namesToClassesTest = zeros(Ntest*3,3);
     namesToClassesTest(Ntest+1:2*Ntest,2) = 1; %versicolour
     namesToClassesTest(2*Ntest+1:3*Ntest,3) = 1; %virginica
     
-%classesTrain(:,3) = [];
+classesTrain(:,3) = [];
 classesTrain(:,2) = [];
-%classesTrain(:,1) = [];
+classesTrain(:,1) = [];
 training_set = classesTrain;
-%classesTest(:,3) = [];
+classesTest(:,3) = [];
 classesTest(:,2) = [];
-%classesTest(:,1) = [];
+classesTest(:,1) = [];
 testing_set = classesTest;
 
 training_idx = namesToClassesTrain;

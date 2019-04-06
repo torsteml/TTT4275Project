@@ -1,4 +1,4 @@
-clear all;
+Vclear all;
 close all;
 
 [training_set, testing_set, training_idx, testing_idx]  = load_iris();
