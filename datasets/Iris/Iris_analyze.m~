@@ -1,7 +1,7 @@
 %% Load dataset
 clear all;
-alpha = 0.01421;
-train_iterations = 10;
+alpha = 0.00991;
+train_iterations = 1000;
 plots = true;
 iterateParams = false;
 iterateVariance = true;
@@ -12,8 +12,8 @@ if(iterateParams)
     plots = false;
 end
 if(iterateVariance)
-    alpha = 0.00941*ones(M);
-    train_iterations = 100;
+    alpha = 0.00991*ones(M);
+    train_iterations = 10;
     plots = false;
     counter = 1;
 end
