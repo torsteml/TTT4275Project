@@ -12,8 +12,8 @@ if(iterateParams)
     plots = false;
 end
 if(iterateVariance)
-    alpha = 0.00941*ones(M);
-    train_iterations = 100;
+    alpha = 0.03941*ones(M);
+    train_iterations = 100000;
     plots = false;
     counter = 1;
 end
@@ -182,6 +182,8 @@ end
 if(iterateVariance)
     disp("-Mean: " + mean(ACCs));
     disp("-Std: " + std(ACCs));
+    pm = 1.960*((std(ACCs))/(sqrt(M)));
+    disp(mean(ACCs) + "pm" + pm);
 end
 
 
